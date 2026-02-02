@@ -126,11 +126,81 @@
 
 ## Công nghệ và Kiến trúc
 
-(Phần này sẽ được cập nhật khi triển khai)
+### Backend (Phase 1.1 - Implemented ✅)
+- **Framework**: NestJS 10.x with TypeScript
+- **Database**: MongoDB with Mongoose ODM
+- **Cache**: Redis for OTP and rate limiting
+- **Validation**: class-validator, class-transformer
+- **Security**: bcrypt password hashing, rate limiting
+- **API Documentation**: Swagger/OpenAPI
+- **Testing**: Jest (32 unit tests, 100% passing)
+
+### Status
+- ✅ Phase 1.1: User Registration System - **COMPLETED**
+- 📋 Phase 1.2: Email/SMS Verification - In Progress
+- 📋 Phase 1.3: Login System - Planned
+- 📋 Phase 1.4: Advanced Authentication - Planned
 
 ## Hướng dẫn Cài đặt
 
-(Phần này sẽ được cập nhật khi triển khai)
+### Quick Start (5 minutes)
+See [QUICKSTART.md](./QUICKSTART.md) for a quick getting-started guide.
+
+### Detailed Setup
+See [SETUP.md](./SETUP.md) for comprehensive installation and configuration instructions.
+
+### Prerequisites
+- Node.js 18+ 
+- MongoDB 6+
+- Redis 6+
+- Docker (recommended for local development)
+
+### Installation
+```bash
+# Clone repository
+git clone https://github.com/dannysnoop/booking-badminton.git
+cd booking-badminton
+
+# Install dependencies
+npm install
+
+# Configure environment
+cp .env.example .env
+
+# Start dependencies (Docker)
+docker run -d -p 27017:27017 --name booking-mongodb mongo:6
+docker run -d -p 6379:6379 --name booking-redis redis:6
+
+# Start application
+npm run start:dev
+
+# Access API
+# - API: http://localhost:3000
+# - Swagger Docs: http://localhost:3000/api/docs
+```
+
+### Testing
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm run test:cov
+
+# Run E2E tests
+npm run test:e2e
+```
+
+## API Documentation
+
+API documentation is available at http://localhost:3000/api/docs when running the application.
+
+### Implemented Endpoints
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/verify` - Verify OTP code
+- `POST /api/auth/resend-otp` - Resend OTP code
+
+See [SETUP.md](./SETUP.md#api-endpoints) for detailed API documentation with request/response examples.
 
 ## Đóng góp
 
