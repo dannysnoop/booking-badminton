@@ -1,17 +1,23 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, InternalServerErrorException } from '@nestjs/common';
+import {
+  ConflictException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 
+// Mock bcrypt
+jest.mock('bcrypt', () => ({
+  hash: jest.fn(),
+}));
+
+import * as bcrypt from 'bcrypt';
+
 describe('AuthService', () => {
   let service: AuthService;
-  let userRepository: Repository<User>;
-  let configService: ConfigService;
 
   const mockUserRepository = {
     findOne: jest.fn(),
@@ -39,11 +45,10 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    configService = module.get<ConfigService>(ConfigService);
 
     // Clear all mocks before each test
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('should be defined', () => {
@@ -77,7 +82,7 @@ describe('AuthService', () => {
       mockUserRepository.save.mockResolvedValue(savedUser);
       mockConfigService.get.mockReturnValue(10);
 
-      jest.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve(hashedPassword));
+      (bcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
 
       const result = await service.register(createUserDto);
 
@@ -95,6 +100,7 @@ describe('AuthService', () => {
     it('should throw ConflictException if email already exists', async () => {
       const existingUser = { id: '1', email: createUserDto.email };
       mockUserRepository.findOne.mockResolvedValueOnce(existingUser);
+      mockConfigService.get.mockReturnValue(10);
 
       await expect(service.register(createUserDto)).rejects.toThrow(
         new ConflictException('Email đã tồn tại'),
@@ -122,7 +128,7 @@ describe('AuthService', () => {
       mockUserRepository.save.mockRejectedValue(new Error('Database error'));
       mockConfigService.get.mockReturnValue(10);
 
-      jest.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve('hashedPassword'));
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashedPassword');
 
       await expect(service.register(createUserDto)).rejects.toThrow(
         InternalServerErrorException,
@@ -137,7 +143,7 @@ describe('AuthService', () => {
       const hashedPassword = 'hashedPassword123';
 
       mockConfigService.get.mockReturnValue(saltRounds);
-      jest.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve(hashedPassword));
+      (bcrypt.hash as jest.Mock).mockResolvedValue(hashedPassword);
 
       const result = await service.hashPassword(password);
 

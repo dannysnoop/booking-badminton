@@ -24,14 +24,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
       if (typeof exceptionResponse === 'object') {
         message =
-          (exceptionResponse as any).message || exception.message;
-        details = (exceptionResponse as any).message
-          ? Array.isArray((exceptionResponse as any).message)
-            ? (exceptionResponse as any).message
-            : [(exceptionResponse as any).message]
+          (exceptionResponse as { message?: string }).message ||
+          exception.message;
+        const responseMessage = (
+          exceptionResponse as { message?: string | string[] }
+        ).message;
+        details = responseMessage
+          ? Array.isArray(responseMessage)
+            ? responseMessage
+            : [responseMessage]
           : [];
       } else {
-        message = exceptionResponse as string;
+        message = exceptionResponse;
       }
 
       // Map status codes to error codes

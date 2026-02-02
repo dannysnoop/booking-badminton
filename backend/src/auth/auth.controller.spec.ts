@@ -67,6 +67,7 @@ describe('AuthController', () => {
         },
         message: 'Đăng ký thành công. Vui lòng xác thực tài khoản.',
       });
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(authService.register).toHaveBeenCalledWith(createUserDto);
     });
 

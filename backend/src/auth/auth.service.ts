@@ -52,13 +52,13 @@ export class AuthService {
 
     try {
       return await this.userRepository.save(user);
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException('Lỗi khi tạo tài khoản');
     }
   }
 
   async hashPassword(password: string): Promise<string> {
-    const saltRounds = this.configService.get<number>('bcrypt.saltRounds');
-    return bcrypt.hash(password, saltRounds);
+    const saltRounds = this.configService.get<number>('bcrypt.saltRounds') || 10;
+    return await bcrypt.hash(password, saltRounds);
   }
 }
