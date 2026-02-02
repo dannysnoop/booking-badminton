@@ -5,10 +5,10 @@ export type UserDocument = User & Document;
 
 @Schema({ timestamps: true })
 export class User {
-  @Prop({ required: true, unique: true, lowercase: true, trim: true })
+  @Prop({ required: true, unique: true, lowercase: true, trim: true, index: true })
   email: string;
 
-  @Prop({ required: true, unique: true, trim: true })
+  @Prop({ required: true, unique: true, trim: true, index: true })
   phone: string;
 
   @Prop({ required: true })
@@ -21,13 +21,10 @@ export class User {
     type: String,
     enum: ['pending', 'verified', 'locked'],
     default: 'pending',
+    index: true,
   })
   status: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-// Indexes
-UserSchema.index({ email: 1 }, { unique: true });
-UserSchema.index({ phone: 1 }, { unique: true });
-UserSchema.index({ status: 1 });
