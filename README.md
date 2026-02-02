@@ -115,7 +115,7 @@
   - Doanh thu theo ngày/tuần/tháng/năm
   - Tỷ lệ lấp đầy sân
   - Phân tích khách hàng: mới, quay lại, VIP
-  - Thống kê khung giờ hot/sepi
+  - Thống kê khung giờ hot/vắng
   - Báo cáo đánh giá và phản hồi khách hàng
   - Xuất báo cáo Excel/PDF
 
