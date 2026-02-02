@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
 import { VerificationCode } from '../entities/verification-code.entity';
 
 @Injectable()
@@ -35,7 +35,7 @@ export class OtpService {
       where: {
         userId,
         code,
-        usedAt: null as any,
+        usedAt: IsNull(),
       },
       order: {
         createdAt: 'DESC',
@@ -60,8 +60,9 @@ export class OtpService {
     if (verificationCode.code !== code) {
       verificationCode.attempts += 1;
       await this.codeRepo.save(verificationCode);
-      
-      const attemptsLeft = verificationCode.maxAttempts - verificationCode.attempts;
+
+      const attemptsLeft =
+        verificationCode.maxAttempts - verificationCode.attempts;
       return { valid: false, attemptsLeft, error: 'INVALID_OTP' };
     }
 
@@ -74,7 +75,7 @@ export class OtpService {
 
   async invalidateOldCodes(userId: string): Promise<void> {
     await this.codeRepo.update(
-      { userId, usedAt: null as any },
+      { userId, usedAt: IsNull() },
       { expiresAt: new Date() }, // Set to current time to expire immediately
     );
   }
@@ -83,7 +84,7 @@ export class OtpService {
     return this.codeRepo.findOne({
       where: {
         userId,
-        usedAt: null as any,
+        usedAt: IsNull(),
       },
       order: {
         createdAt: 'DESC',

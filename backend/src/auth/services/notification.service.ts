@@ -17,6 +17,7 @@ export class NotificationService {
     this.logger.log(
       `[MOCK EMAIL] Sending OTP to ${email}: ${code} (expires in ${expiresInMinutes} minutes)`,
     );
+    return Promise.resolve();
 
     // Production implementation example with SendGrid:
     // const sgMail = require('@sendgrid/mail');
@@ -34,6 +35,7 @@ export class NotificationService {
     // Mock implementation for testing
     // In production, integrate with Twilio, VNPT SMS, or other SMS service
     this.logger.log(`[MOCK SMS] Sending OTP to ${phone}: ${code}`);
+    return Promise.resolve();
 
     // Production implementation example with Twilio:
     // const twilio = require('twilio');

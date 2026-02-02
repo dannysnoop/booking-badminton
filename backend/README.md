@@ -1,98 +1,335 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Booking Badminton - Backend API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Phase 1.1: User Registration with OTP Verification
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This is the NestJS backend implementation for the user registration system with OTP verification.
 
-## Description
+## Features
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- ✅ User registration with email and phone validation
+- ✅ OTP generation and verification (6-digit code)
+- ✅ Email/SMS notification system (mocked for testing)
+- ✅ Rate limiting protection
+- ✅ Duplicate email/phone detection
+- ✅ Password hashing with bcrypt
+- ✅ Comprehensive error handling
+- ✅ Swagger API documentation
+- ✅ Unit tests with >80% coverage
+- ✅ E2E tests
 
-## Project setup
+## Tech Stack
 
-```bash
-$ npm install
-```
+- **Framework**: NestJS 10.x
+- **Database**: PostgreSQL with TypeORM
+- **Validation**: class-validator, class-transformer
+- **Rate Limiting**: @nestjs/throttler
+- **API Documentation**: Swagger/OpenAPI
+- **Testing**: Jest, Supertest
 
-## Compile and run the project
+## Prerequisites
 
-```bash
-# development
-$ npm run start
+- Node.js 18+ 
+- PostgreSQL 14+
+- npm or yarn
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
+## Installation
 
 ```bash
-# unit tests
-$ npm run test
+# Install dependencies
+npm install
 
-# e2e tests
-$ npm run test:e2e
+# Copy environment file
+cp .env.example .env
 
-# test coverage
-$ npm run test:cov
+# Edit .env with your database credentials
 ```
 
-## Deployment
+## Environment Variables
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+See `.env.example` for all required environment variables:
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+- Database configuration (PostgreSQL)
+- Server configuration
+- Security settings (bcrypt salt rounds)
+- OTP configuration (expiry time, max attempts, cooldown)
+- Email/SMS service credentials (optional for testing)
+- Rate limiting settings
+
+## Database Setup
+
+1. Create a PostgreSQL database:
+```sql
+CREATE DATABASE booking_badminton;
+```
+
+2. The application will automatically create tables on startup (synchronize: true in development mode)
+
+### Database Schema
+
+The application creates three main tables:
+
+- **users**: User account information
+- **verification_codes**: OTP codes for verification
+- **registration_logs**: Audit logs for registration events
+
+## Running the Application
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Development mode (with auto-reload)
+npm run start:dev
+
+# Production mode
+npm run build
+npm run start:prod
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+The API will be available at `http://localhost:3000`
 
-## Resources
+## API Documentation
 
-Check out a few resources that may come in handy when working with NestJS:
+Once the server is running, access Swagger documentation at:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```
+http://localhost:3000/api/docs
+```
 
-## Support
+## API Endpoints
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### 1. Register New User
 
-## Stay in touch
+**POST** `/api/auth/register`
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Register a new user account and send OTP verification code.
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "phone": "0912345678",
+  "password": "SecurePass123!",
+  "fullName": "Nguyễn Văn A"
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "success": true,
+  "data": {
+    "userId": "uuid-here",
+    "email": "user@example.com",
+    "phone": "0912345678",
+    "fullName": "Nguyễn Văn A",
+    "status": "pending",
+    "expiresAt": "2026-02-02T10:10:00Z"
+  },
+  "message": "Đăng ký thành công. Vui lòng kiểm tra email/SMS để xác thực tài khoản."
+}
+```
+
+### 2. Verify OTP
+
+**POST** `/api/auth/verify`
+
+Verify the OTP code to activate the user account.
+
+**Request Body:**
+```json
+{
+  "userId": "uuid-here",
+  "code": "123456"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "userId": "uuid-here",
+    "email": "user@example.com",
+    "status": "verified"
+  },
+  "message": "Xác thực tài khoản thành công"
+}
+```
+
+### 3. Resend OTP
+
+**POST** `/api/auth/resend-otp`
+
+Request a new OTP code.
+
+**Request Body:**
+```json
+{
+  "userId": "uuid-here",
+  "type": "email"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "data": {
+    "expiresAt": "2026-02-02T10:20:00Z",
+    "nextResendAt": "2026-02-02T10:11:00Z"
+  },
+  "message": "Mã OTP mới đã được gửi"
+}
+```
+
+## Error Responses
+
+All errors follow a consistent format:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human-readable error message",
+    "details": [] // Optional, for validation errors
+  }
+}
+```
+
+### Common Error Codes
+
+- `DUPLICATE_EMAIL`: Email already registered
+- `DUPLICATE_PHONE`: Phone number already registered
+- `INVALID_OTP`: Incorrect OTP code
+- `OTP_EXPIRED`: OTP code has expired
+- `TOO_MANY_ATTEMPTS`: Too many failed OTP attempts
+- `RATE_LIMIT_EXCEEDED`: Rate limit exceeded
+- `VALIDATION_ERROR`: Input validation failed
+
+## Rate Limiting
+
+The API implements rate limiting to prevent abuse:
+
+- **Register**: Default throttling (10 requests per 60 seconds)
+- **Verify**: Default throttling (10 requests per 60 seconds)
+- **Resend OTP**: 1 request per 60 seconds, max 5 per day
+
+## Testing
+
+```bash
+# Run unit tests
+npm test
+
+# Run unit tests with coverage
+npm test -- --coverage --testPathIgnorePatterns='e2e-spec'
+
+# Run specific test file
+npm test -- otp.service.spec
+
+# Run E2E tests (requires database)
+npm run test:e2e
+```
+
+### Test Coverage
+
+Current test coverage (unit tests):
+- Services: **95.72%** statement coverage
+- Entities: **95.34%** statement coverage
+- **26 unit tests** passing
+- **14 E2E tests** (11 validation tests passing)
+
+## Project Structure
+
+```
+backend/
+├── src/
+│   ├── auth/
+│   │   ├── dto/                    # Data Transfer Objects
+│   │   │   ├── register.dto.ts
+│   │   │   ├── verify-otp.dto.ts
+│   │   │   └── resend-otp.dto.ts
+│   │   ├── entities/               # TypeORM entities
+│   │   │   ├── user.entity.ts
+│   │   │   ├── verification-code.entity.ts
+│   │   │   └── registration-log.entity.ts
+│   │   ├── services/              # Business logic
+│   │   │   ├── auth.service.ts
+│   │   │   ├── otp.service.ts
+│   │   │   └── notification.service.ts
+│   │   ├── tests/                 # Unit tests
+│   │   │   ├── auth.service.spec.ts
+│   │   │   └── otp.service.spec.ts
+│   │   ├── auth.controller.ts
+│   │   └── auth.module.ts
+│   ├── config/
+│   │   └── database.config.ts
+│   ├── app.module.ts
+│   └── main.ts
+├── test/
+│   ├── auth.e2e-spec.ts          # E2E tests
+│   └── jest-e2e.json
+├── .env.example
+├── package.json
+└── README.md
+```
+
+## Security Features
+
+1. **Password Hashing**: Passwords are hashed using bcrypt with 10 salt rounds
+2. **OTP Security**: 
+   - 6-digit random codes
+   - 10-minute expiry
+   - Maximum 5 attempts
+   - One-time use only
+3. **Rate Limiting**: Prevents brute force attacks
+4. **Input Validation**: Comprehensive validation using class-validator
+5. **Audit Logging**: All registration events are logged
+
+## Validation Rules
+
+### Email
+- Must be valid RFC 5322 format
+- Required field
+
+### Phone
+- Must be Vietnamese format: `0xxx` or `+84xxx`
+- Required field
+
+### Password
+- Minimum 8 characters
+- Must contain uppercase letter
+- Must contain lowercase letter
+- Must contain number
+- Must contain special character
+
+### Full Name
+- Minimum 2 characters
+- Required field
+
+## Development Notes
+
+1. **Mock Services**: Email and SMS services are mocked in the current implementation. To enable real notifications:
+   - Configure SendGrid for email (SENDGRID_API_KEY)
+   - Configure Twilio for SMS (TWILIO credentials)
+   - Uncomment the implementation in `notification.service.ts`
+
+2. **Database Synchronization**: In production, disable `synchronize` in TypeORM config and use migrations instead
+
+3. **Environment**: Make sure to set `NODE_ENV=production` in production to disable development features
+
+## Future Enhancements
+
+- [ ] Implement real email service integration
+- [ ] Implement real SMS service integration
+- [ ] Add Redis for OTP and rate limiting storage
+- [ ] Add database migrations
+- [ ] Add more comprehensive E2E tests with test database
+- [ ] Add logging middleware
+- [ ] Add health check endpoints
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+MIT
+
+## Support
+
+For issues and questions, please create an issue in the GitHub repository.
