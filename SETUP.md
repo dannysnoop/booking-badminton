@@ -11,7 +11,7 @@ This is the NestJS backend implementation for Phase 1.1 - User Registration Syst
 - ✅ MongoDB with TTL indexes for automatic cleanup
 - ✅ Comprehensive error handling
 - ✅ Swagger API documentation
-- ✅ Unit tests (28 tests, 100% passing)
+- ✅ Unit tests (32 tests, 100% passing)
 - ✅ E2E tests prepared
 
 ## Tech Stack
@@ -219,10 +219,11 @@ npm run test:e2e
 ```
 
 ### Test results
-- ✅ 28 unit tests passing
-- ✅ OtpService: 10 tests
-- ✅ RateLimitService: 7 tests
-- ✅ AuthService: 11 tests
+- ✅ 32 unit tests passing
+- ✅ OtpService: 9 tests
+- ✅ RateLimitService: 9 tests
+- ✅ AuthService: 10 tests
+- ✅ AuthController: 4 tests
 
 ## Database Schema
 
