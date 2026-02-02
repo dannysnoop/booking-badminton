@@ -58,7 +58,8 @@ export class AuthService {
   }
 
   async hashPassword(password: string): Promise<string> {
-    const saltRounds = this.configService.get<number>('bcrypt.saltRounds') || 10;
+    const saltRounds =
+      this.configService.get<number>('bcrypt.saltRounds') || 10;
     return await bcrypt.hash(password, saltRounds);
   }
 }
