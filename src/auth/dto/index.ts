@@ -1,3 +1,10 @@
 export { RegisterDto } from './register.dto';
 export { VerifyOtpDto } from './verify-otp.dto';
 export { ResendOtpDto } from './resend-otp.dto';
+export { LoginDto } from './login.dto';
+export { RefreshTokenDto } from './refresh-token.dto';
+export { LogoutDto } from './logout.dto';
+export { GoogleLoginDto, FacebookLoginDto } from './social-login.dto';
+export { Enable2FADto, Verify2FADto, Disable2FADto, UseBackupCodeDto } from './two-factor.dto';
+export { ForgotPasswordDto, ResetPasswordDto, ChangePasswordDto } from './password.dto';
+export { UpdateProfileDto } from './profile.dto';

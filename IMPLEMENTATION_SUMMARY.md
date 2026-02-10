@@ -1,365 +1,339 @@
-# Phase 1.1 Implementation Summary
+# Implementation Summary - Phase 1 & 2
 
-## ✅ COMPLETE - User Registration Backend
+## ✅ Completed Features
 
-**Issue**: [Phase 1.1] Đăng ký tài khoản người dùng cơ bản - NestJS Backend (MongoDB + Redis)  
-**Branch**: `copilot/register-basic-user-account`  
-**Status**: ✅ Production Ready  
-**Date**: February 2, 2026
+### Phase 1: Registration & OTP Verification
 
----
+#### API Endpoints
+1. **POST /api/auth/register** - Đăng ký tài khoản
+   - ✅ Validation với class-validator
+   - ✅ Kiểm tra email/phone trùng lặp
+   - ✅ Hash password với bcrypt
+   - ✅ Tạo user với status='pending'
+   - ✅ Sinh và lưu OTP (10 phút TTL)
+   - ✅ Ghi log registration event
+   - ✅ Rate limiting: 5 requests/IP/15 phút
 
-## 📊 Implementation Statistics
+2. **POST /api/auth/verify** - Xác thực OTP
+   - ✅ Validate OTP code (6 số)
+   - ✅ Kiểm tra expiration
+   - ✅ Giới hạn 5 lần nhập sai
+   - ✅ Cập nhật status='verified'
+   - ✅ Ghi log verify events
+   - ✅ Rate limiting: 10 requests/user/5 phút
 
-| Metric | Value |
-|--------|-------|
-| **TypeScript Files** | 24 |
-| **Unit Tests** | 32 (100% passing) |
-| **Test Suites** | 4 (all passing) |
-| **Services** | 4 (Auth, OTP, RateLimit, Notification) |
-| **API Endpoints** | 3 (Register, Verify, Resend OTP) |
-| **Database Collections** | 3 (users, verification_codes, registration_logs) |
-| **Build Status** | ✅ Success |
-| **Security Scan** | ✅ 0 vulnerabilities |
+3. **POST /api/auth/resend-otp** - Gửi lại OTP
+   - ✅ Cooldown 1 phút giữa các lần
+   - ✅ Daily limit: 5 lần/ngày
+   - ✅ Invalidate OTP cũ
+   - ✅ Sinh OTP mới
+   - ✅ Ghi log resend event
 
----
+#### Database Schemas
+- ✅ **User Schema**: email, phone, passwordHash, fullName, status, isActive, isLocked, failedLoginCount, lockedAt
+- ✅ **VerificationCode Schema**: userId, code, type, expiresAt, attempts, maxAttempts, usedAt
+- ✅ **RegistrationLog Schema**: userId, email, phone, eventType, ipAddress, userAgent, metadata
 
-## 🎯 Completed Requirements
-
-### ✅ Database (MongoDB)
-- [x] User schema with unique indexes (email, phone)
-- [x] VerificationCode schema with TTL index (auto-cleanup)
-- [x] RegistrationLog schema for audit trail
-- [x] Proper indexes for query optimization
-
-### ✅ Cache (Redis)
-- [x] OTP caching (10-minute TTL)
-- [x] Rate limiting storage
-- [x] Automatic key expiration
-- [x] Fallback to MongoDB if Redis fails
-
-### ✅ API Endpoints
-- [x] POST /api/auth/register (with rate limiting)
-- [x] POST /api/auth/verify (with attempt tracking)
-- [x] POST /api/auth/resend-otp (with cooldown)
-- [x] Comprehensive validation on all inputs
-- [x] Standardized error responses
-
-### ✅ Business Logic
-- [x] Email/phone validation (RFC 5322, Vietnam format)
-- [x] Password strength validation (8+ chars, mixed case, numbers, special chars)
-- [x] OTP generation (6-digit random)
-- [x] OTP validation with attempt tracking
-- [x] Rate limiting (IP-based and user-based)
-- [x] Duplicate user detection
-- [x] User status management (pending → verified)
-
-### ✅ Security
-- [x] bcrypt password hashing (10 salt rounds)
-- [x] Rate limiting (5 reg/IP/15min, 10 verify/user/5min, 1 resend/user/min)
-- [x] Input validation and sanitization
-- [x] MongoDB injection protection
-- [x] Secure OTP handling (max 5 attempts, 10-min expiry)
-- [x] No sensitive data in logs
-
-### ✅ Testing
-- [x] OtpService: 9 unit tests
-- [x] RateLimitService: 9 unit tests  
-- [x] AuthService: 10 unit tests
-- [x] AuthController: 4 unit tests
-- [x] E2E test infrastructure ready
-- [x] 100% test pass rate
-
-### ✅ Documentation
-- [x] QUICKSTART.md - 5-minute setup guide
-- [x] SETUP.md - Comprehensive documentation (9700+ chars)
-- [x] README.md - Updated with implementation status
-- [x] Swagger/OpenAPI documentation
-- [x] Code comments where necessary
-- [x] .env.example with all configuration options
+#### Services
+- ✅ **AuthService**: register, verifyOtp, resendOtp
+- ✅ **OtpService**: generateOtp, validateOtp, invalidateOldCodes
+- ✅ **RateLimitService**: checkRegisterLimit, checkVerifyLimit, checkResendLimit
+- ✅ **NotificationService**: sendOtpEmail, sendOtpSms, sendOtpDemoCache (stub)
 
 ---
 
-## 🏗️ Architecture
+### Phase 2: Login & Token Management
 
-### Project Structure
+#### API Endpoints
+1. **POST /api/auth/login** - Đăng nhập
+   - ✅ Login bằng email hoặc phone
+   - ✅ Verify password với bcrypt
+   - ✅ Kiểm tra user status (verified, active, not locked)
+   - ✅ Track failed login attempts
+   - ✅ Lock account sau 5 lần sai
+   - ✅ Reset failed count khi login thành công
+   - ✅ Sinh JWT access token (1h)
+   - ✅ Sinh refresh token (7d)
+   - ✅ Lưu refresh token hash vào DB
+   - ✅ Ghi log login events
+
+2. **POST /api/auth/refresh** - Làm mới token
+   - ✅ Verify refresh token
+   - ✅ Sinh access token mới
+   - ✅ Sinh refresh token mới
+   - ✅ Revoke refresh token cũ
+   - ✅ Ghi log token_refresh event
+
+3. **POST /api/auth/logout** - Đăng xuất
+   - ✅ Require JWT authentication
+   - ✅ Revoke refresh token
+   - ✅ Ghi log logout event
+
+4. **GET /api/auth/profile** - Lấy thông tin profile
+   - ✅ Require JWT authentication
+   - ✅ Return user info (userId, email, phone, fullName, status, isActive, isLocked)
+
+#### Database Schemas
+- ✅ **RefreshToken Schema**: userId, tokenHash (SHA-256), expiresAt, isRevoked, ipAddress, userAgent
+- ✅ **LoginLog Schema**: userId, eventType, ipAddress, userAgent, metadata
+
+#### Authentication & Security
+- ✅ **JwtStrategy**: Passport JWT strategy
+- ✅ **JwtAuthGuard**: Guard cho protected routes
+- ✅ **CurrentUser Decorator**: Lấy user info từ request
+- ✅ Account locking sau 5 failed attempts
+- ✅ Token refresh với rotation
+- ✅ Refresh token hashing (SHA-256)
+- ✅ Failed login tracking
+
+---
+
+## 📁 File Structure
+
 ```
 src/
-├── auth/                       # Authentication module
-│   ├── dto/                    # Data Transfer Objects (3 files)
-│   ├── schemas/                # MongoDB schemas (3 files)
-│   ├── services/               # Business logic (4 services)
-│   ├── tests/                  # Unit tests (4 test files)
-│   ├── auth.controller.ts      # HTTP endpoints
-│   └── auth.module.ts          # Module definition
-├── database/                   # Database configuration
-│   ├── mongodb.module.ts       # MongoDB setup
-│   └── redis.module.ts         # Redis setup
-├── common/                     # Shared utilities
-│   ├── decorators/             # Custom decorators
-│   ├── filters/                # Exception filters
-│   └── interceptors/           # Response transformers
-├── app.module.ts               # Root module
-└── main.ts                     # Application entry
+├── auth/
+│   ├── auth.controller.ts          ✅ All endpoints implemented
+│   ├── auth.module.ts               ✅ Complete with JWT & Passport
+│   ├── dto/
+│   │   ├── index.ts                 ✅
+│   │   ├── register.dto.ts          ✅
+│   │   ├── verify-otp.dto.ts        ✅
+│   │   ├── resend-otp.dto.ts        ✅
+│   │   ├── login.dto.ts             ✅
+│   │   ├── refresh-token.dto.ts     ✅
+│   │   ├── logout.dto.ts            ✅
+│   │   └── responses/
+│   │       ├── index.ts             ✅
+│   │       ├── register-response.dto.ts    ✅
+│   │       ├── verify-response.dto.ts      ✅
+│   │       ├── resend-otp-response.dto.ts  ✅
+│   │       ├── login-response.dto.ts       ✅
+│   │       ├── profile-response.dto.ts     ✅
+│   │       └── api-response.dto.ts         ✅
+│   ├── schemas/
+│   │   ├── user.schema.ts           ✅ Updated with security fields
+│   │   ├── verification-code.schema.ts     ✅
+│   │   ├── registration-log.schema.ts      ✅
+│   │   ├── refresh-token.schema.ts         ✅
+│   │   └── login-log.schema.ts             ✅
+│   ├── services/
+│   │   ├── auth.service.ts          ✅ Complete with all methods
+│   │   ├── otp.service.ts           ✅
+│   │   ├── rate-limit.service.ts    ✅
+│   │   └── notification.service.ts  ✅
+│   ├── strategies/
+│   │   └── jwt.strategy.ts          ✅ Passport JWT strategy
+│   ├── guards/
+│   │   └── jwt-auth.guard.ts        ✅
+│   └── tests/
+│       ├── auth.service.spec.ts     ✅ Register/Verify/Resend tests
+│       ├── auth-login.service.spec.ts      ✅ Login/Profile/Logout tests
+│       ├── auth.controller.spec.ts  ✅
+│       └── rate-limit.service.spec.ts      ✅
+├── common/
+│   ├── decorators/
+│   │   ├── ip-address.decorator.ts  ✅
+│   │   └── current-user.decorator.ts       ✅
+│   ├── filters/
+│   │   └── http-exception.filter.ts        ✅
+│   └── interceptors/
+│       └── transform.interceptor.ts        ✅
+└── database/
+    ├── mongodb.module.ts            ✅
+    └── redis.module.ts              ✅
+
+test/
+├── auth.e2e-spec.ts                 ✅ Register/Verify/Resend E2E
+└── auth-login.e2e-spec.ts           ✅ Login/Profile/Logout E2E
+
+root/
+├── .env.example                     ✅ Environment variables template
+├── API_DOCUMENTATION.md             ✅ Complete API docs
+├── phase1-be.md                     ✅ Phase 1 requirements
+└── phase2.md                        ✅ Phase 2 requirements
 ```
 
-### Technology Stack
-- **Runtime**: Node.js 18+
-- **Framework**: NestJS 10.x
-- **Language**: TypeScript 5.x
-- **Database**: MongoDB 6+ (Mongoose ODM)
-- **Cache**: Redis 6+
-- **Validation**: class-validator, class-transformer
-- **Hashing**: bcrypt
-- **Testing**: Jest, Supertest, mongodb-memory-server
-- **Documentation**: Swagger/OpenAPI
+---
 
-### Data Flow
+## 🧪 Testing Coverage
+
+### Unit Tests
+- ✅ AuthService: register, verifyOtp, resendOtp
+- ✅ AuthService: login, refreshToken, logout, getProfile
+- ✅ RateLimitService: checkRegisterLimit, checkVerifyLimit, checkResendLimit
+- ✅ AuthController: all endpoints
+
+### E2E Tests
+- ✅ Registration flow (success, duplicate, validation)
+- ✅ OTP verification (success, wrong code, expired)
+- ✅ Resend OTP (success, rate limiting)
+- ✅ Login flow (email/phone, success, wrong password)
+- ✅ Token refresh (success, invalid token)
+- ✅ Profile endpoint (authenticated access)
+- ✅ Logout (success, token revocation)
+- ✅ Account locking (5 failed attempts)
+
+### Test Commands
+```bash
+npm run test              # Run unit tests
+npm run test:e2e          # Run E2E tests
+npm run test:cov          # Run with coverage
+npm run test:watch        # Watch mode
 ```
-Client Request
-    ↓
-AuthController (validation)
-    ↓
-RateLimitService (check limits via Redis)
-    ↓
-AuthService (business logic)
-    ↓
-├─→ UserModel (MongoDB)
-├─→ OtpService (Redis + MongoDB)
-├─→ NotificationService (console log / future: SendGrid/Twilio)
-└─→ RegistrationLogModel (MongoDB)
-    ↓
-Response (standardized format)
+
+---
+
+## 📚 API Documentation
+
+### Swagger UI
+Access interactive API documentation at:
 ```
+http://localhost:3000/api
+```
+
+### Endpoints Summary
+
+| Method | Endpoint | Auth Required | Description |
+|--------|----------|---------------|-------------|
+| POST | /api/auth/register | ❌ | Đăng ký tài khoản |
+| POST | /api/auth/verify | ❌ | Xác thực OTP |
+| POST | /api/auth/resend-otp | ❌ | Gửi lại OTP |
+| POST | /api/auth/login | ❌ | Đăng nhập |
+| POST | /api/auth/refresh | ❌ | Làm mới token |
+| POST | /api/auth/logout | ✅ | Đăng xuất |
+| GET | /api/auth/profile | ✅ | Lấy thông tin profile |
 
 ---
 
 ## 🔒 Security Features
 
 1. **Password Security**
-   - bcrypt hashing with 10 salt rounds
-   - Password strength requirements enforced
-   - Never logged or stored in plain text
+   - ✅ Bcrypt hashing with salt
+   - ✅ Password strength validation
+   - ✅ Min 8 chars, uppercase, lowercase, number, special char
 
-2. **Rate Limiting**
-   - Register: 5 requests per IP per 15 minutes
-   - Verify: 10 requests per user per 5 minutes
-   - Resend OTP: 1 request per user per minute
-   - Daily limit: 5 resends per user per day
+2. **Token Security**
+   - ✅ JWT access token (1h expiration)
+   - ✅ JWT refresh token (7d expiration)
+   - ✅ Token rotation on refresh
+   - ✅ Refresh token hashing (SHA-256) in DB
+   - ✅ Token revocation on logout
 
-3. **OTP Security**
-   - 6-digit random codes
-   - Maximum 5 attempts before lockout
-   - 10-minute expiry
-   - Automatic invalidation on resend
-   - Cached in Redis for performance
+3. **Account Security**
+   - ✅ Account locking after 5 failed login attempts
+   - ✅ Failed login count tracking
+   - ✅ Status checks (verified, active, not locked)
+   - ✅ OTP expiration (10 minutes)
+   - ✅ OTP attempt limiting (5 tries)
 
-4. **Input Validation**
-   - Email: RFC 5322 compliance
-   - Phone: Vietnam format (0xxx or +84xxx)
-   - All inputs sanitized and validated
-   - Protection against injection attacks
+4. **Rate Limiting**
+   - ✅ Registration: 5/IP/15min
+   - ✅ Verification: 10/user/5min
+   - ✅ Resend OTP: 1min cooldown, 5/day
+   - ✅ Redis-based rate limiting
 
-5. **Audit Trail**
-   - All registration events logged
-   - IP address and user agent tracking
-   - Success/failure tracking
-   - Metadata support for debugging
-
----
-
-## 📈 Performance Optimizations
-
-1. **Redis Caching**
-   - OTP cached for instant validation
-   - Rate limit counters in memory
-   - Reduces MongoDB queries by 70%+
-
-2. **MongoDB Indexes**
-   - Unique indexes on email and phone (fast duplicate checks)
-   - Index on user status (fast status queries)
-   - Index on userId in verification codes
-   - TTL index for automatic cleanup
-
-3. **Connection Pooling**
-   - Mongoose connection pool
-   - Redis connection pool
-   - Efficient resource utilization
-
-4. **Async/Await**
-   - Non-blocking I/O operations
-   - Parallel processing where possible
-   - Efficient error handling
+5. **Audit Logging**
+   - ✅ Registration events
+   - ✅ Verification attempts (success/failed)
+   - ✅ Login attempts (success/failed)
+   - ✅ Logout events
+   - ✅ Token refresh events
+   - ✅ IP address & user agent tracking
 
 ---
 
-## 🧪 Testing Coverage
+## 🚀 Running the Application
 
-### Unit Tests (32 tests)
-```
-✓ OtpService (9 tests)
-  ✓ Generate 6-digit OTP
-  ✓ Cache OTP to Redis
-  ✓ Validate correct OTP
-  ✓ Track wrong attempts
-  ✓ Expire after 10 minutes
-  ✓ Max 5 attempts
-  ✓ Fallback to MongoDB
-  ✓ Invalidate old codes
-  ✓ Mark as used
+### Prerequisites
+```bash
+# Install dependencies
+npm install
 
-✓ RateLimitService (9 tests)
-  ✓ Allow within register limit
-  ✓ Block when register limit exceeded
-  ✓ Allow first request
-  ✓ Allow within verify limit
-  ✓ Block when verify limit exceeded
-  ✓ Block during cooldown
-  ✓ Block when daily limit exceeded
-  ✓ Allow resend within limits
-  ✓ Track cooldown periods
-
-✓ AuthService (10 tests)
-  ✓ Register new user
-  ✓ Hash password correctly
-  ✓ Detect duplicate email
-  ✓ Detect duplicate phone
-  ✓ Verify correct OTP
-  ✓ Reject invalid OTP
-  ✓ Update user status
-  ✓ Resend OTP successfully
-  ✓ Invalidate old OTPs
-  ✓ Log all events
-
-✓ AuthController (4 tests)
-  ✓ Call register service
-  ✓ Call verify service
-  ✓ Call resend service
-  ✓ Return standardized responses
+# Setup environment variables
+cp .env.example .env
+# Edit .env with your configurations
 ```
 
-### E2E Tests (Ready)
-- Registration flow
-- Verification flow
-- Resend OTP flow
-- Error handling
-- Rate limiting
+### Development
+```bash
+# Start MongoDB (Docker)
+docker run -d -p 27017:27017 --name mongodb mongo:latest
 
----
+# Start Redis (Docker)
+docker run -d -p 6379:6379 --name redis redis:latest
 
-## 📝 API Documentation
+# Start development server
+npm run start:dev
+```
 
-All endpoints documented in Swagger UI: http://localhost:3000/api/docs
+### Production
+```bash
+# Build
+npm run build
 
-### Endpoints
-1. **POST /api/auth/register**
-   - Creates new user with pending status
-   - Generates and caches OTP
-   - Sends OTP notification
-   - Returns: userId, expiresAt, status
-
-2. **POST /api/auth/verify**
-   - Validates OTP code
-   - Updates user status to verified
-   - Tracks attempts
-   - Returns: userId, status
-
-3. **POST /api/auth/resend-otp**
-   - Invalidates old OTP
-   - Generates new OTP
-   - Enforces cooldown and daily limits
-   - Returns: expiresAt, nextResendAt
-
-### Response Format
-All responses follow consistent format:
-```json
-{
-  "success": true/false,
-  "data": { ... },
-  "message": "Human-readable message",
-  "error": {
-    "code": "ERROR_CODE",
-    "message": "Error description"
-  }
-}
+# Start production server
+npm run start:prod
 ```
 
 ---
 
-## 🚀 Deployment Ready
+## 📝 Environment Variables
 
-### Environment Variables
-All necessary environment variables documented in `.env.example`:
-- MongoDB connection string
-- Redis configuration
-- Server port
-- Security settings
-- OTP configuration
-- Rate limiting parameters
-- Email/SMS credentials (for future phases)
+Required variables (see `.env.example`):
 
-### Production Checklist
-- [x] Build succeeds without errors
-- [x] All tests passing
-- [x] Security scan clean
-- [x] Documentation complete
-- [x] Environment variables documented
-- [x] Error handling comprehensive
-- [x] Logging implemented
-- [ ] MongoDB Atlas connection (deployment time)
-- [ ] Redis Cloud connection (deployment time)
-- [ ] Email service integration (Phase 1.2)
-- [ ] SMS service integration (Phase 1.2)
-
----
-
-## 🔮 Future Enhancements (Next Phases)
-
-### Phase 1.2 - Email/SMS Verification
-- [ ] SendGrid integration for email
-- [ ] Twilio integration for SMS
-- [ ] Email templates
-- [ ] SMS templates
-
-### Phase 1.3 - Login System
-- [ ] JWT token generation
-- [ ] Refresh token mechanism
-- [ ] Session management
-- [ ] Remember me functionality
-
-### Phase 1.4 - Advanced Authentication
-- [ ] Social login (Google, Facebook)
-- [ ] Two-factor authentication (2FA)
-- [ ] Account recovery flow
-- [ ] Email/phone change flow
-
----
-
-## 📞 Support Resources
-
-- **Documentation**: [SETUP.md](./SETUP.md), [QUICKSTART.md](./QUICKSTART.md)
-- **API Docs**: http://localhost:3000/api/docs
-- **Test Files**: See `src/auth/tests/` for usage examples
-- **Issues**: GitHub Issues
+```env
+MONGODB_URI=mongodb://localhost:27017/badminton-booking
+REDIS_HOST=localhost
+REDIS_PORT=6379
+JWT_SECRET=your-super-secret-jwt-key
+JWT_EXPIRES_IN=1h
+JWT_REFRESH_SECRET=your-super-secret-refresh-key
+JWT_REFRESH_EXPIRES_IN=7d
+PORT=3000
+NODE_ENV=development
+```
 
 ---
 
 ## ✨ Key Achievements
 
-1. ✅ **Production-ready backend** in NestJS
-2. ✅ **100% test coverage** on critical paths
-3. ✅ **Zero security vulnerabilities** (CodeQL verified)
-4. ✅ **Comprehensive documentation** (3 guides)
-5. ✅ **Performance optimized** with Redis caching
-6. ✅ **Scalable architecture** following NestJS best practices
-7. ✅ **Type-safe** with TypeScript
-8. ✅ **Rate limiting** to prevent abuse
-9. ✅ **Audit logging** for compliance
-10. ✅ **Developer-friendly** with Swagger docs
+1. **Complete Authentication Flow**: Registration → OTP Verification → Login → Token Management → Logout
+2. **Security Best Practices**: Password hashing, JWT tokens, account locking, rate limiting
+3. **Comprehensive Testing**: Unit tests + E2E tests with high coverage
+4. **Production-Ready**: Error handling, logging, validation, documentation
+5. **Scalable Architecture**: Modular design, service-oriented, MongoDB + Redis
+6. **API Documentation**: Swagger UI + detailed markdown docs
 
 ---
 
-**Implementation completed by**: GitHub Copilot  
-**Reviewed and approved**: Ready for Phase 1.2  
-**Total implementation time**: ~2 hours  
-**Code quality**: Production-ready ✅
+## 🎯 Next Steps (Future Enhancements)
+
+- [ ] Password reset flow
+- [ ] Email verification links (alternative to OTP)
+- [ ] Two-factor authentication (2FA)
+- [ ] Social login (Google, Facebook)
+- [ ] Role-based access control (RBAC)
+- [ ] Session management
+- [ ] Device management
+- [ ] Admin panel for user management
+
+---
+
+## 📊 Code Quality
+
+- ✅ TypeScript strict mode
+- ✅ ESLint configured
+- ✅ Prettier formatting
+- ✅ Clean architecture
+- ✅ Dependency injection
+- ✅ Error handling
+- ✅ Input validation
+- ✅ Security best practices
+
+---
+
+**Implementation Status: COMPLETE** ✅
+
+All features from Phase 1 and Phase 2 have been successfully implemented, tested, and documented.
+

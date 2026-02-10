@@ -4,6 +4,11 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { DatabaseModule } from './database/mongodb.module';
 import { RedisModule } from './database/redis.module';
 import { AuthModule } from './auth/auth.module';
+import { CourtsModule } from './courts/courts.module';
+import { BookingsModule } from './bookings/bookings.module';
+import { AnalyticsModule } from './analytics/analytics.module';
+import { RBACModule } from './rbac/rbac.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
@@ -16,6 +21,11 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
     DatabaseModule,
     RedisModule,
     AuthModule,
+    CourtsModule,
+    BookingsModule,
+    AnalyticsModule,
+    RBACModule,
+    NotificationsModule,
   ],
   providers: [
     {

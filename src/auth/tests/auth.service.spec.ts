@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictException, BadRequestException } from '@nestjs/common';
 import { getModelToken } from '@nestjs/mongoose';
+import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '../services/auth.service';
 import { OtpService } from '../services/otp.service';
 import { RateLimitService } from '../services/rate-limit.service';
@@ -15,6 +16,7 @@ describe('AuthService', () => {
   let mockOtpService: any;
   let mockNotificationService: any;
   let mockRateLimitService: any;
+  let mockJwtService: any;
 
   beforeEach(async () => {
     mockUserModel = {
@@ -36,12 +38,18 @@ describe('AuthService', () => {
     mockNotificationService = {
       sendOtpEmail: jest.fn(),
       sendOtpSms: jest.fn(),
+      sendOtpDemoCache: jest.fn(),
     };
 
     mockRateLimitService = {
       checkRegisterLimit: jest.fn(),
       checkVerifyLimit: jest.fn(),
       checkResendLimit: jest.fn(),
+    };
+
+    mockJwtService = {
+      sign: jest.fn().mockReturnValue('mock-jwt-token'),
+      verify: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -58,6 +66,10 @@ describe('AuthService', () => {
         {
           provide: OtpService,
           useValue: mockOtpService,
+        },
+        {
+          provide: JwtService,
+          useValue: mockJwtService,
         },
         {
           provide: NotificationService,
@@ -90,16 +102,13 @@ describe('AuthService', () => {
       mockUserModel.findOne.mockResolvedValue(null);
       mockUserModel.create.mockResolvedValue({
         _id: 'user123',
+        id: 'user123',
         email: registerDto.email,
         phone: registerDto.phone,
         fullName: registerDto.fullName,
         status: 'pending',
       });
-      mockOtpService.generateOtp.mockResolvedValue({
-        code: '123456',
-        expiresAt: new Date(),
-      });
-      mockNotificationService.sendOtpEmail.mockResolvedValue(undefined);
+      mockNotificationService.sendOtpDemoCache.mockResolvedValue(undefined);
       mockLogModel.create.mockResolvedValue({});
 
       const result = await service.register(registerDto, '192.168.1.1', 'TestAgent');
@@ -107,8 +116,7 @@ describe('AuthService', () => {
       expect(result.email).toBe(registerDto.email);
       expect(result.status).toBe('pending');
       expect(mockUserModel.create).toHaveBeenCalled();
-      expect(mockOtpService.generateOtp).toHaveBeenCalled();
-      expect(mockNotificationService.sendOtpEmail).toHaveBeenCalled();
+      expect(mockNotificationService.sendOtpDemoCache).toHaveBeenCalled();
       expect(mockLogModel.create).toHaveBeenCalled();
     });
 
